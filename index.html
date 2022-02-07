@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色弱練習</title>
+    <!-- fontawesome -->
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: '微軟正黑體';
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            width: 100%;
+            min-width: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #282d36;
+            flex-flow: column;
+            color: #f2f2f2;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: calc(1600px + 10%);
+        }
+
+        .game-start {
+            display: flex;
+            flex-flow: column;
+            gap: 20px;
+            /* display: none; */
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .game-box {
+            display: none;
+            /* display: block; */
+
+
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .time-box {
+            display: flex;
+            gap: 5px;
+        }
+
+        .time-icon {
+            animation-name: pulse;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale3d(1, 1, 1);
+            }
+
+            50% {
+                transform: scale3d(1.25, 1.25, 1.25);
+            }
+
+            to {
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+
+        .game {
+            width: 500px;
+            height: 500px;
+            background-color: #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-flow: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .game {
+                width: 400px;
+                height: 400px;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 539px) {
+            .game {
+                width: 300px;
+                height: 300px;
+            }
+        }
+
+        .box {
+            width: calc(100% / var(--side));
+            height: calc(100% / var(--side));
+            background-color: rgb(9, 78, 26);
+            border-radius: 10px;
+            border: 5px solid #ddd;
+
+        }
+
+        .box.anwser {
+            opacity: calc(var(--side) / 11);
+        }
+
+        .btns {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .btn {
+            width: 200px;
+            height: 35px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            background-color: #da9622;
+            box-shadow: 0 5px #da9622;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            color: #f2f2f2;
+            transform: translateY(-5px);
+            text-shadow: 0 10px 3px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="game-start">
+            <h1>色弱遊戲</h1>
+            <p>找出所有色塊裡顏色不同的一個!!</p>
+            <div class="btn btn-start">遊戲開始</div>
+        </div>
+        <div class="game-box">
+            <div class="dashboard">
+                <div class="time-box">
+                    <p class="time-icon"><i class="fal fa-clock"></i></p>
+                    <div class="timer">60秒</div>
+                </div>
+                <div class="score">分數 : 0 分</div>
+            </div>
+            <div class="game">
+            </div>
+            <div class="btns">
+                <button class="btn btn-stop">遊戲暫停</button>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <script>
+        const gameStartElement = document.querySelector('.game-start');
+        const gameBoxElement = document.querySelector('.game-box');
+        const gameElement = document.querySelector('.game');
+        const timerElement = document.querySelector('.timer');
+        const scoreElement = document.querySelector('.score');
+        const startBtn = document.querySelector('.btn-start');
+        const stopBtn = document.querySelector('.btn-stop');
+
+        let score = 0;
+        let time = 60;
+        let RunOrNot = true;
+
+
+        //單邊個數   
+        let side = 2;
+
+        let times = [0, 0, 1, 1, 1, 2, 3, 4, 567];
+        let count = 1;
+
+        //產生方塊
+        function createBox() {
+            let boxes = '';
+            let anwser = Math.floor(Math.random() * side ** 2);
+
+            //產生背景三色
+            let r = Math.floor(Math.random() * 225);
+            let g = Math.floor(Math.random() * 225);
+            let b = Math.floor(Math.random() * 225);
+
+            //樣板字串  邊寬
+            let style = `style="--side:${side};background-color:rgb(${r}, ${g}, ${b})"`;
+
+            for (let i = 0; i < side ** 2; i++) {
+
+                if (i == anwser) {
+                    boxes += `<div class="box anwser" ${style} ></div>`;
+                } else {
+                    boxes += `<div class="box" ${style} ></div>`;
+                }
+            }
+            gameElement.innerHTML = boxes;
+        }
+
+        //進入下一關
+        function anwserSetting() {
+            //做完方塊之後，在正確答案上綁定重設的事件
+            const anwserElement = document.querySelector('.box.anwser');
+            anwserElement.addEventListener('click', function () {
+                if (count == times[side]) {
+                    count = 1;
+                    side += 1;
+                } else {
+                    count += 1;
+                }
+                //分數加一
+                score += 1;
+                scoreElement.innerHTML = `分數 : ${score} 分`
+                //給下一題 
+                resetContainer();
+            });
+        }
+
+        function resetContainer() {
+            createBox();
+            anwserSetting();
+        }
+
+        resetContainer();
+
+        //開始遊戲
+        startBtn.addEventListener('click', function () {
+            gameStartElement.style['display'] = 'none';
+            gameBoxElement.style['display'] = 'block';
+            countdown = setInterval(function () {
+                time = time - 0.1
+                timerElement.innerHTML = ` ${time.toFixed(1)} 秒`
+                if (time <= 0) {
+                    //時間到了停止計時器
+                    clearInterval(countdown)
+                }
+            }, 100)
+
+
+        }),
+
+            //遊戲暫停
+            stopBtn.addEventListener('click', function () {
+                //判斷計時是否執行
+                if (RunOrNot) {
+                    clearInterval(countdown)
+                    RunOrNot = false;
+                } else {
+                    countdown = setInterval(function () {
+                        time = time - 0.1
+                        timerElement.innerHTML = ` ${time.toFixed(1)} 秒`
+                        if (time <= 0) {
+                            //時間到了停止計時器
+                            clearInterval(countdown)
+                        }
+                    }, 100)
+                    //倒數的執行狀態改為true
+                    RunOrNot = true
+                }
+
+            });
+
+        //倒數計時
+
+        // countdown = setInterval(function () {
+        //     time = time - 0.1
+        //     timerElement.innerHTML = ` ${time.toFixed(1)} 秒`
+        //     if (time <= 0) {
+        //         //時間到了停止計時器
+        //         clearInterval(countdown)
+        //     }
+        // }, 100)
+
+
+
+
+
+
+
+
+        // 1. 變換顏色
+        // 2. 變換數量
+        // 3. 難度(透明度)
+        // 4. 計分
+        // 5. 計時
+        // 6. 暫停
+
+
+    </script>
+</body>
+
+</html>
